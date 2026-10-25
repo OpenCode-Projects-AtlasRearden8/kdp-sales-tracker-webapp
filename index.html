@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KDP Sales Tracker</title>
+<meta name="description" content="Offline tracker for Kindle Direct Publishing sales: monthly royalties, format and marketplace breakdowns, rank notes, and year-over-year snapshots. All data stays in your browser.">
+<style>
+:root{
+  --bg:#faf6ee;
+  --surface:#fffdf8;
+  --surface-2:#f4ecdd;
+  --ink:#2b2620;
+  --muted:#6f6455;
+  --border:#e4d9c6;
+  --accent:#b45309;
+  --accent-ink:#fffaf3;
+  --accent-soft:#fdeacc;
+  --ok:#1a7f37;
+  --ok-soft:#dcf2e0;
+  --down:#b42318;
+  --down-soft:#fde3e0;
+  --grid:#efe5d3;
+  --shadow:0 1px 2px rgba(43,38,32,.06),0 8px 24px rgba(43,38,32,.07);
+}
+html[data-theme="dark"]{
+  --bg:#171512;
+  --surface:#201d18;
+  --surface-2:#2a261f;
+  --ink:#ece4d4;
+  --muted:#a89d8b;
+  --border:#3a342b;
+  --accent:#e8a13c;
+  --accent-ink:#211a0d;
+  --accent-soft:#3d2f14;
+  --ok:#66d68a;
+  --ok-soft:#1d2f21;
+  --down:#f58a7f;
+  --down-soft:#3a211d;
+  --grid:#2c271f;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:16px;
+  line-height:1.55;
+}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.25;margin:0 0 .35em}
+h1{font-size:1.7rem}
+h2{font-size:1.25rem}
+h3{font-size:1.05rem}
+p{margin:.3em 0}
+a{color:var(--accent)}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.wrap{max-width:1080px;margin:0 auto;padding:0 1rem}
+header.site{border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--surface),var(--bg))}
+header.site .wrap{padding-top:1.1rem;padding-bottom:.8rem}
+.titlebar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:baseline;justify-content:space-between}
+.controls{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+label.inline{font-size:.85rem;color:var(--muted);display:inline-flex;gap:.4rem;align-items:center}
+select,input[type="text"],input[type="number"],input[type="date"],input[type="search"],textarea{
+  font:inherit;color:var(--ink);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:.42rem .55rem;
+}
+select:hover,input:hover,textarea:hover{border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+nav.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.7rem}
+nav.chips a{
+  text-decoration:none;color:var(--ink);background:var(--surface-2);
+  border:1px solid var(--border);border-radius:999px;padding:.15rem .7rem;font-size:.85rem
+}
+nav.chips a:hover{border-color:var(--accent);color:var(--accent)}
+main{padding:1.2rem 0 2.5rem}
+section{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:1rem 1.1rem;margin:0 0 1.2rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:.9rem 1rem}
+.card .label{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.card .value{font-size:1.55rem;font-weight:700;margin-top:.15rem}
+.card .sub{font-size:.85rem;color:var(--muted);margin-top:.15rem}
+.chip{display:inline-block;border-radius:999px;padding:.14rem .65rem;font-size:.88rem;font-weight:600}
+.chip.up{background:var(--ok-soft);color:var(--ok)}
+.chip.down{background:var(--down-soft);color:var(--down)}
+.chip.flat{background:var(--accent-soft);color:var(--accent)}
+form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.75rem;align-items:end}
+.field label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.2rem}
+.field input,.field select{width:100%}
+.actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}
+button{
+  font:inherit;font-weight:600;
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  color:var(--ink);
+  border-radius:9px;
+  padding:.45rem .9rem;
+  cursor:pointer;
+}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.primary:hover{filter:brightness(1.07);color:var(--accent-ink)}
+button.danger{color:var(--down)}
+button.mini{padding:.2rem .55rem;font-size:.8rem;border-radius:7px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:.42rem .55rem;border-bottom:1px solid var(--grid);white-space:nowrap}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tfoot td{font-weight:700;border-top:2px solid var(--border);border-bottom:none}
+tr:hover td{background:var(--accent-soft)}
+tr.head td{background:transparent}
+caption{text-align:left;font-size:.85rem;color:var(--muted);padding-bottom:.4rem}
+.barcols{display:flex;align-items:flex-end;gap:.35rem;height:170px;padding:.25rem .25rem 0;border-bottom:2px solid var(--border)}
+.barcol{flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:20px}
+.barcol .bar{width:70%;max-width:44px;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.barcol .v{font-size:.7rem;color:var(--muted);margin-bottom:.15rem}
+.barlabels{display:flex;gap:.35rem;padding-top:.25rem}
+.barlabels span{flex:1 1 0;text-align:center;font-size:.72rem;color:var(--muted);min-width:20px}
+.hbar{background:var(--surface-2);border-radius:999px;height:10px;width:100%;min-width:70px;overflow:hidden}
+.hbar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+td .hbar{vertical-align:middle}
+.empty{color:var(--muted);font-style:italic;padding:.4rem .2rem}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.2rem}
+#status{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;z-index:60;max-width:92vw}
+#status .msg{background:var(--ink);color:var(--bg);border-radius:10px;padding:.55rem 1rem;box-shadow:var(--shadow);font-size:.9rem}
+#status .msg.err{background:var(--down);color:#fff}
+#status .msg.ok{background:var(--ok);color:#fff}
+dialog{border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--ink);width:min(640px,94vw);padding:1.1rem;box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(20,16,10,.55)}
+dialog .row{display:flex;flex-wrap:wrap;gap:.7rem 1.2rem;margin:.4rem 0}
+dialog textarea{width:100%;min-height:110px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.83rem}
+details.rowdetails{margin:.3rem 0}
+summary{cursor:pointer;font-weight:600}
+.rankbadge{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:0 .55rem;font-size:.8rem;font-weight:700}
+footer.site{border-top:1px solid var(--border);color:var(--muted);padding:1rem 0 2rem;font-size:.85rem}
+sr-only,.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:640px){
+  .barcols{height:120px}
+  .value{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <div class="titlebar">
+      <div>
+        <h1>KDP Sales Tracker</h1>
+        <p class="muted small">Your Kindle Direct Publishing royalties, tracked by hand &mdash; monthly totals, breakdowns, rank notes, and year-over-year snapshots. No scraping, no accounts: your numbers, typed or imported, stay in this browser.</p>
+      </div>
+      <div class="controls">
+        <label class="inline">Year
+          <select id="yearFilter" aria-label="Year filter"></select>
+        </label>
+        <label class="inline">Symbol
+          <select id="symbolSelect" aria-label="Currency symbol">
+            <option value="$">$ (USD)</option>
+            <option value=" £">£ (GBP)</option>
+            <option value=" €">€ (EUR)</option>
+            <option value=" ¥">¥ (JPY)</option>
+            <option value="">None</option>
+          </select>
+        </label>
+        <label class="inline">Theme
+          <select id="themeSelect" aria-label="Theme">
+            <option value="auto">Auto</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <nav class="chips" aria-label="Sections">
+      <a href="#addSale">Add sale</a>
+      <a href="#monthly">Monthly</a>
+      <a href="#breakdowns">Breakdowns</a>
+      <a href="#books">Books & rank notes</a>
+      <a href="#yoy">Year over year</a>
+      <a href="#log">Entry log</a>
+      <a href="#data">Import & export</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section aria-label="Summary">
+    <div class="cards">
+      <div class="card">
+        <div class="label" id="statTotalLabel">Royalties</div>
+        <div class="value" id="statTotal">&mdash;</div>
+        <div class="sub" id="statTotalSub">no data yet</div>
+      </div>
+      <div class="card">
+        <div class="label">Best month</div>
+        <div class="value" id="statBest">&mdash;</div>
+        <div class="sub" id="statBestSub">—</div>
+      </div>
+      <div class="card">
+        <div class="label">Trend</div>
+        <div class="value" id="statTrend">&mdash;</div>
+        <div class="sub" id="statTrendSub">month to month</div>
+      </div>
+      <div class="card">
+        <div class="label">Entries</div>
+        <div class="value" id="statCount">&mdash;</div>
+        <div class="sub" id="statCountSub">in this view</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="addSale" aria-label="Add a sale">
+    <h2>Add or edit a sale</h2>
+    <p class="muted small">One book sale or royalty line at a time. The date, royalty, and title are what matter most &mdash; everything else has friendly defaults.</p>
+    <form id="entryForm" class="grid" autocomplete="off">
+      <div class="field">
+        <label for="eDate">Date</label>
+        <input type="date" id="eDate" required>
+      </div>
+      <div class="field">
+        <label for="eTitle">Book title</label>
+        <input type="text" id="eTitle" list="bookList" required placeholder="The Massive AI Manual">
+        <datalist id="bookList"></datalist>
+      </div>
+      <div class="field">
+        <label for="eFormat">Format</label>
+        <input type="text" id="eFormat" list="formatList" value="Paperback">
+        <datalist id="formatList"></datalist>
+      </div>
+      <div class="field">
+        <label for="eMarket">Marketplace</label>
+        <input type="text" id="eMarket" list="marketList" value="Amazon.com">
+        <datalist id="marketList"></datalist>
+      </div>
+      <div class="field">
+        <label for="eUnits">Units (optional)</label>
+        <input type="number" id="eUnits" min="0" step="1" inputmode="numeric" placeholder="1">
+      </div>
+      <div class="field">
+        <label for="eRoyalty">Royalty</label>
+        <input type="number" id="eRoyalty" step="0.01" inputmode="decimal" required placeholder="7.18">
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button type="submit" class="primary" id="saveBtn">Add sale</button>
+      </div>
+      <div class="field" id="cancelField" hidden>
+        <label>&nbsp;</label>
+        <button type="button" id="cancelEditBtn" class="danger">Cancel edit</button>
+      </div>
+    </form>
+    <p class="muted small" id="editHint"></p>
+  </section>
+
+  <section id="monthly" aria-label="Monthly royalties">
+    <h2>Monthly royalties</h2>
+    <div class="barcols" id="monthChart" aria-hidden="true"></div>
+    <div class="barlabels" id="monthChartLabels" aria-hidden="true"></div>
+    <div class="tablewrap">
+      <table id="monthTable">
+        <caption id="monthCaption">Monthly totals</caption>
+        <thead>
+          <tr><th scope="col">Month</th><th scope="col" class="num">Entries</th><th scope="col" class="num">Units</th><th scope="col" class="num">Royalty</th><th scope="col" class="num">Share</th></tr>
+        </thead>
+        <tbody id="mTbody"></tbody>
+        <tfoot><tr><td>Total</td><td class="num" id="mTotalCount">0</td><td class="num" id="mTotalUnits">0</td><td class="num" id="mTotalRoyalty">&mdash;</td><td class="num" id="mTotalShare">100%</td></tr></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section id="breakdowns" aria-label="Breakdowns">
+    <h2>Breakdowns</h2>
+    <div class="split">
+      <div id="byFormatBox">
+        <h3 style="margin-bottom:.5rem">By format</h3>
+        <div class="tablewrap"><table id="formatTable">
+          <thead><tr><th scope="col">Format</th><th scope="col" class="num">Units</th><th scope="col" class="num">Royalty</th><th scope="col">Share</th></tr></thead>
+          <tbody id="fmtTbody"></tbody>
+        </table></div>
+      </div>
+      <div id="byMarketBox">
+        <h3 style="margin-bottom:.5rem">By marketplace</h3>
+        <div class="tablewrap"><table id="marketTable">
+          <thead><tr><th scope="col">Marketplace</th><th scope="col" class="num">Units</th><th scope="col" class="num">Royalty</th><th scope="col">Share</th></tr></thead>
+          <tbody id="mktTbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="books" aria-label="Books and rank notes">
+    <h2>Books & rank notes</h2>
+    <p class="muted small">Every book that appears in a sale (or that you add by hand) lives here. Use the rank-note log to jot days like &ldquo;rank #8,412 in the niche&rdquo; so you can see what ads and promos did next.</p>
+    <div class="split">
+      <div class="tablewrap">
+        <table id="bookTable">
+          <caption id="bookCaption">Per-book view</caption>
+          <thead><tr><th scope="col">Title</th><th scope="col" class="num">Entries</th><th scope="col" class="num">Units</th><th scope="col" class="num">Royalty</th><th scope="col" class="num">Notes</th><th scope="col">Actions</th></tr></thead>
+          <tbody id="bookTbody"></tbody>
+        </table>
+        <div class="actions">
+          <form id="bookForm" class="inline" style="display:flex;gap:.5rem;align-items:end">
+            <div class="field">
+              <label for="newBookTitle">Add a book (no sales yet)</label>
+              <input type="text" id="newBookTitle" placeholder="My next novel" required>
+            </div>
+            <button type="submit" class="mini">Add book</button>
+          </form>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:.5rem">Rank-note log</h3>
+        <form id="noteForm" autocomplete="off">
+          <div class="field">
+            <label for="bookSelect">Book</label>
+            <select id="bookSelect" required></select>
+          </div>
+          <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+            <div class="field">
+              <label for="noteDate">Note date</label>
+              <input type="date" id="noteDate" required>
+            </div>
+            <div class="field">
+              <label for="noteRank">Rank number (optional)</label>
+              <input type="number" id="noteRank" min="0" step="1" inputmode="numeric" placeholder="8412">
+            </div>
+          </div>
+          <div class="field">
+            <label for="noteText">What changed? (optional if you gave a rank)</label>
+            <input type="text" id="noteText" placeholder="Launched 5-day price promo; ad budget at $3/day">
+          </div>
+          <div class="actions"><button type="submit" class="primary">Add note</button></div>
+        </form>
+        <ul id="notesList" style="padding-left:1.1rem;margin-top:.8rem"></ul>
+        <p class="muted small" id="notesHint">Select a book to see its notes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="yoy" aria-label="Year over year snapshot">
+    <h2>Year-over-year snapshot</h2>
+    <p class="muted small">All years side by side. The last column is the change versus the previous year.</p>
+    <div class="tablewrap">
+      <table id="yoyTable">
+        <thead><tr id="yoyHeadRow"><th scope="col">Year</th></tr></thead>
+        <tbody id="yoyTbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="log" aria-label="Entry log">
+    <h2>Entry log</h2>
+    <p>
+      <label class="inline" for="searchInput">Filter by
+        <input type="search" id="searchInput" placeholder="title, format, or marketplace">
+      </label>
+    </p>
+    <div class="tablewrap">
+      <table id="entriesTable">
+        <thead><tr><th scope="col">Date</th><th scope="col">Title</th><th scope="col">Format</th><th scope="col">Marketplace</th><th scope="col" class="num">Units</th><th scope="col" class="num">Royalty</th><th scope="col">Actions</th></tr></thead>
+        <tbody id="entriesTbody"></tbody>
+      </table>
+    </div>
+    <p class="muted small" id="entriesNote" hidden></p>
+  </section>
+
+  <section id="data" aria-label="Import and export data">
+    <h2>Import & export</h2>
+    <p class="muted small">Bring in a CSV you built by hand or downloaded from your KDP reports &mdash; the importer looks for date, title, format, marketplace, units, and royalty columns in any order. Export gives you a portable backup of every entry.</p>
+    <div class="actions">
+      <button id="importBtn" class="primary">Import CSV&hellip;</button>
+      <button id="exportBtn">Export CSV</button>
+      <button id="templateBtn">Download CSV template</button>
+      <button id="backupBtn">Backup (JSON)</button>
+      <button id="restoreBtn">Restore backup&hellip;</button>
+      <input type="file" id="restoreInput" accept=".json,application/json" hidden>
+      <button id="sampleBtn">Load sample data</button>
+      <button id="clearBtn" class="danger">Clear all data</button>
+    </div>
+    <p class="muted small">Tip: the importer can <strong>append</strong> to what you already have, or <strong>replace</strong> everything &mdash; handy when a monthly KDP report overlaps entries from last month.</p>
+  </section>
+</main>
+
+<div id="status" aria-live="polite" aria-atomic="true"></div>
+
+<footer class="site">
+  <div class="wrap">
+    <p>KDP Sales Tracker &mdash; a by-hand sales log for independent authors. Built by <strong>Asdale Dynamics, LLC</strong>. MIT licensed. Your data lives only in this browser&rsquo;s local storage; nothing is uploaded anywhere, ever.</p>
+  </div>
+</footer>
+
+<dialog id="importDialog">
+  <form id="importForm" method="dialog">
+    <h2>Import CSV</h2>
+    <div class="row">
+      <label class="inline"><input type="radio" name="importMode" value="append" checked> Append to current data</label>
+      <label class="inline"><input type="radio" name="importMode" value="replace"> Replace all current data</label>
+    </div>
+    <div class="row">
+      <div class="field" style="flex:1 1 240px">
+        <label for="importFile">Pick a .csv file</label>
+        <input type="file" id="importFile" accept=".csv,text/csv,text/plain">
+      </div>
+    </div>
+    <div class="field">
+      <label for="importText">&hellip;or paste CSV rows here</label>
+      <textarea id="importText" placeholder="Date,Title,Format,Marketplace,Units,Royalty&#10;2026-09-14,The Massive AI Manual,Paperback,Amazon.com,2,7.18"></textarea>
+    </div>
+    <div class="actions">
+      <button type="button" id="doImport" class="primary">Import</button>
+      <button type="submit" value="close">Close</button>
+    </div>
+    <div id="importSummary" class="small" style="margin-top:.6rem"></div>
+  </form>
+</dialog>
+
+<script>
+'use strict';
+/*@KDP-CORE-START@*/
+var MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var CANON_FORMATS = ['Kindle (eBook)','Paperback','Hardcover','Audiobook','Other'];
+var CANON_MARKETPLACES = ['Amazon.com','Amazon.co.uk','Amazon.com.au','Amazon.ca','Amazon.in','Amazon.de','Amazon.fr','Amazon.es','Amazon.it','Amazon.nl','Amazon.pl','Amazon.se','Amazon.com.br','Amazon.com.mx','Amazon.co.jp','Other'];
+
+function ymdOr(y, mo, d) {
+  if (y < 1000 || y > 9999 || mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+  var dt = new Date(Date.UTC(y, mo - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return null;
+  var m = mo < 10 ? '0' + mo : '' + mo;
+  var dd = d < 10 ? '0' + d : '' + d;
+  return y + '-' + m + '-' + dd;
+}
+
+function normalizeDateString(input) {
+  if (input == null) return null;
+  var s = String(input).trim();
+  if (!s) return null;
+  var m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+  if (m) return ymdOr(+m[1], +m[2], +m[3]);
+  m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/);
+  if (m) return ymdOr(+m[3], +m[1], +m[2]);
+  m = s.match(/^(\d{4})-?(\d{2})$/);
+  if (m) return ymdOr(+m[1], +m[2], 1);
+  return null;
+}
+
+function parseRoyaltyValue(input) {
+  if (input == null) return null;
+  var s = String(input).trim();
+  if (!s) return null;
+  var neg = false;
+  if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+  s = s.replace(/[$£€¥]/g, '').replace(/\s/g, '');
+  if (s.indexOf(',') !== -1 && /^\s*\d{1,3}(,\d{3})+(\.\d+)?\s*$/.test(s)) {
+    s = s.replace(/,/g, '');
+  } else if (s.indexOf(',') !== -1) {
+    s = s.replace(/,/g, '.');
+  }
+  s = s.replace(/^\+/, '');
+  if (!/^-?(\d+(\.\d+)?|\.\d+)$/.test(s)) return null;
+  var n = Number(s);
+  if (!isFinite(n)) return null;
+  if (neg) n = -n;
+  return n;
+}
+
+function parseUnitsValue(input) {
+  var n = parseRoyaltyValue(input);
+  if (n == null) return null;
+  var r = Math.round(n);
+  return Math.abs(n - r) < 1e-9 ? r : n;
+}
+
+function canonicalizeValue(value, canonList) {
+  var v = String(value == null ? '' : value).trim();
+  if (!v) return '';
+  var lower = v.toLowerCase();
+  for (var i = 0; i < canonList.length; i++) {
+    if (canonList[i].toLowerCase() === lower) return canonList[i];
+  }
+  for (var j = 0; j < canonList.length; j++) {
+    if (canonList[j].toLowerCase().indexOf(lower) === 0) return canonList[j];
+  }
+  return v.charAt(0).toUpperCase() + v.slice(1);
+}
+
+function csvEscape(value) {
+  var s = String(value == null ? '' : value);
+  if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function parseCSVText(text) {
+  if (text == null) return [];
+  var s = String(text);
+  var rows = [];
+  var cell = '';
+  var row = [];
+  var inQuotes = false;
+  var line = 1;
+  var started = false;
+  var pendingCR = false;
+  var rowStart = 1;
+  function endRow() {
+    row.push(cell);
+    cell = '';
+    if (row.length !== 1 || row[0] !== '') rows.push({ cells: row, line: rowStart });
+    row = [];
+  }
+  for (var i = 0; i < s.length; i++) {
+    var c = s[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (s[i + 1] === '"') { cell += '"'; i++; }
+        else inQuotes = false;
+      } else {
+        cell += c;
+        if (c === '\n') line++;
+      }
+    } else {
+      if (c === '"') {
+        if (cell === '') { inQuotes = true; }
+        else cell += '"';
+      } else if (c === ',') {
+        row.push(cell);
+        cell = '';
+        started = true;
+      } else if (c === '\n') {
+        if (!pendingCR) { endRow(); rowStart = line + 1; }
+        pendingCR = false;
+        line++;
+      } else if (c === '\r') {
+        pendingCR = true;
+        endRow();
+        rowStart = line + 1;
+      } else {
+        cell += c;
+      }
+    }
+  }
+  if (cell !== '' || row.length > 0 || started) {
+    if (inQuotes) {
+      row.push(cell);
+      rows.push({ cells: row, line: line });
+    } else {
+      endRow();
+    }
+  }
+  return rows;
+}
+
+function matchColumns(headerCells) {
+  var found = { date: -1, title: -1, format: -1, marketplace: -1, units: -1, royalty: -1 };
+  if (!headerCells || !headerCells.length) return found;
+  var norm = headerCells.map(function (h) {
+    return String(h == null ? '' : h).trim().toLowerCase().replace(/^amazon-/i, '').replace(/[^a-z0-9]/g, '');
+  });
+  var claimed = {};
+  function claim(field, test) {
+    for (var i = 0; i < norm.length; i++) {
+      if (!norm[i] || claimed[i]) continue;
+      if (test(norm[i])) { claimed[i] = true; found[field] = i; return; }
+    }
+  }
+  claim('date', function (n) { return n.indexOf('date') !== -1 || n === 'day' || n.indexOf('ordered') !== -1; });
+  claim('title', function (n) { return n.indexOf('title') !== -1 || n === 'book' || n.indexOf('booktitle') !== -1 || n.indexOf('product') !== -1 || n === 'item' || n === 'name' || n === 'asin'; });
+  claim('format', function (n) { return n.indexOf('format') !== -1 || n === 'type' || n.indexOf('producttype') !== -1 || n.indexOf('edition') !== -1 || n === 'medium'; });
+  claim('marketplace', function (n) { return n.indexOf('market') !== -1 || n === 'store' || n === 'country' || n.indexOf('channel') !== -1; });
+  claim('units', function (n) { return (n.indexOf('unit') !== -1 && n.indexOf('price') === -1) || n === 'qty' || n.indexOf('quantity') !== -1 || n.indexOf('copies') !== -1; });
+  claim('royalty', function (n) { return n.indexOf('royalt') !== -1 || n.indexOf('earning') !== -1 || n.indexOf('revenue') !== -1 || n === 'amount'; });
+  return found;
+}
+
+function makeId() {
+  return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function parseKdpCsv(text) {
+  var rows = parseCSVText(text);
+  var out = { records: [], skipped: [], headerFound: false };
+  if (!rows.length) {
+    if (String(text || '').trim()) out.skipped.push({ line: 1, reason: 'no header row found' });
+    return out;
+  }
+  var header = rows[0].cells;
+  var headerBlank = true;
+  for (var h = 0; h < header.length; h++) {
+    if (String(header[h]).trim()) { headerBlank = false; break; }
+  }
+  if (headerBlank) return out;
+  var cols = matchColumns(header);
+  if (cols.date === -1 || cols.royalty === -1) {
+    out.skipped.push({ line: rows[0].line, reason: 'header must include a date column and a royalty column' });
+    return out;
+  }
+  out.headerFound = true;
+  for (var i = 1; i < rows.length; i++) {
+    var cells = rows[i].cells;
+    var lineNo = rows[i].line;
+    if (cells.length === 1 && cells[0].trim() === '') continue;
+    var dateRaw = cols.date !== -1 ? cells[cols.date] : '';
+    var titleRaw = cols.title !== -1 ? cells[cols.title] : '';
+    var formatRaw = cols.format !== -1 ? cells[cols.format] : '';
+    var marketRaw = cols.marketplace !== -1 ? cells[cols.marketplace] : '';
+    var unitsRaw = cols.units !== -1 ? cells[cols.units] : '';
+    var royaltyRaw = cols.royalty !== -1 ? cells[cols.royalty] : '';
+    var date = normalizeDateString(dateRaw);
+    if (!date) { out.skipped.push({ line: lineNo, reason: 'bad or missing date: "' + String(dateRaw).trim() + '"' }); continue; }
+    var royalty = parseRoyaltyValue(royaltyRaw);
+    if (royalty == null) { out.skipped.push({ line: lineNo, reason: 'bad or missing royalty: "' + String(royaltyRaw).trim() + '"' }); continue; }
+    var title = String(titleRaw).trim();
+    if (!title) { out.skipped.push({ line: lineNo, reason: 'missing title' }); continue; }
+    var units = unitsRaw.trim() === '' ? null : parseUnitsValue(unitsRaw);
+    out.records.push({
+      id: makeId(),
+      date: date,
+      title: title,
+      format: canonicalizeValue(formatRaw || 'Other', CANON_FORMATS) || 'Other',
+      marketplace: canonicalizeValue(marketRaw || 'Other', CANON_MARKETPLACES) || 'Other',
+      units: units,
+      royalty: royalty
+    });
+  }
+  return out;
+}
+
+function recordsToCsv(records) {
+  var head = ['Date', 'Title', 'Format', 'Marketplace', 'Units', 'Royalty'];
+  var lines = [head.join(',')];
+  for (var i = 0; i < records.length; i++) {
+    var r = records[i];
+    lines.push([
+      csvEscape(r.date),
+      csvEscape(r.title),
+      csvEscape(r.format),
+      csvEscape(r.marketplace),
+      r.units == null ? '' : csvEscape(String(r.units)),
+      csvEscape(roundMoney(r.royalty).toFixed(2))
+    ].join(','));
+  }
+  return lines.join('\r\n') + '\r\n';
+}
+
+function templateCsv() {
+  return 'Date,Title,Format,Marketplace,Units,Royalty\r\n' +
+    '2026-09-14,The Massive AI Manual,Paperback,Amazon.com,2,7.18\r\n' +
+    '2026-09-21,The Massive AI Manual,Kindle (eBook),Amazon.co.uk,1,2.41\r\n';
+}
+
+function filterRecordsByYear(records, year) {
+  if (year == null || year === 'all') return records.slice();
+  var ys = String(year);
+  var out = [];
+  for (var i = 0; i < records.length; i++) {
+    if (records[i] && records[i].date && records[i].date.slice(0, 4) === ys) out.push(records[i]);
+  }
+  return out;
+}
+
+function roundMoney(n) {
+  var v = Math.round(n * 100) / 100;
+  return v === 0 ? 0 : v;
+}
+
+function round1(n) {
+  var v = Math.round(n * 10) / 10;
+  return v === 0 ? 0 : v;
+}
+
+function fmtMoney(n, symbol) {
+  symbol = symbol == null ? '' : String(symbol).trim();
+  if (n == null || !isFinite(n)) n = 0;
+  var abs = roundMoney(Math.abs(n));
+  var parts = abs.toFixed(2).split('.');
+  var grouped = parts[0].replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+  var body = symbol + grouped + '.' + parts[1];
+  return n < 0 && abs !== 0 ? '-' + body : body;
+}
+
+function fmtInt(n) {
+  if (n == null || !isFinite(n)) n = 0;
+  var s = String(Math.abs(Math.round(n)));
+  var out = s.replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+  return n < 0 ? '-' + out : out;
+}
+
+function pctChangeNum(prev, curr) {
+  if (prev === 0) return null;
+  return round1((curr - prev) / prev * 100);
+}
+
+function monthLabel(ym) {
+  var y = String(ym).slice(0, 4);
+  var mi = parseInt(String(ym).slice(5, 7), 10) - 1;
+  var name = (mi >= 0 && mi < 12) ? MONTH_NAMES[mi] : String(ym).slice(5, 7);
+  return name + ' ' + y;
+}
+
+function pushBreak(map, key, units, royalty) {
+  var b = map[key];
+  if (!b) { b = map[key] = { key: key, total: 0, units: 0, count: 0 }; }
+  b.total += royalty;
+  b.units += units == null ? 0 : units;
+  b.count += 1;
+}
+
+function sortedBreakdown(map, grandTotal) {
+  var arr = Object.keys(map).map(function (k) { return map[k]; });
+  arr.sort(function (a, b) {
+    if (b.total !== a.total) return b.total - a.total;
+    if (a.key < b.key) return -1;
+    if (a.key > b.key) return 1;
+    return 0;
+  });
+  for (var i = 0; i < arr.length; i++) {
+    arr[i].pct = grandTotal > 0 ? round1(arr[i].total / grandTotal * 100) : 0;
+  }
+  return arr;
+}
+
+function distinctYears(records) {
+  var set = {};
+  for (var i = 0; i < records.length; i++) {
+    var r = records[i];
+    if (r && r.date) set[r.date.slice(0, 4)] = true;
+  }
+  return Object.keys(set).sort();
+}
+
+function latestYear(records) {
+  var ys = distinctYears(records);
+  return ys.length ? ys[ys.length - 1] : null;
+}
+
+function buildAggregates(records) {
+  var monthsMap = {};
+  var byFormat = {};
+  var byMarket = {};
+  var byBook = {};
+  var yearsMap = {};
+  var grandTotal = 0;
+  var grandUnits = 0;
+  var count = 0;
+  for (var i = 0; i < records.length; i++) {
+    var r = records[i];
+    if (!r || typeof r.royalty !== 'number' || !isFinite(r.royalty)) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(r.date || ''))) continue;
+    var ym = r.date.slice(0, 7);
+    var y = r.date.slice(0, 4);
+    var units = r.units == null ? 0 : r.units;
+    grandTotal += r.royalty;
+    grandUnits += units;
+    count += 1;
+    var M = monthsMap[ym];
+    if (!M) M = monthsMap[ym] = { ym: ym, total: 0, units: 0, count: 0 };
+    M.total += r.royalty;
+    M.units += units;
+    M.count += 1;
+    var Y = yearsMap[y];
+    if (!Y) Y = yearsMap[y] = { year: y, total: 0, units: 0, count: 0, months: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] };
+    Y.total += r.royalty;
+    Y.units += units;
+    Y.count += 1;
+    var mi = parseInt(r.date.slice(5, 7), 10) - 1;
+    if (mi >= 0 && mi < 12) Y.months[mi] += r.royalty;
+    pushBreak(byFormat, canonicalizeValue(r.format || 'Other', CANON_FORMATS) || 'Other', units, r.royalty);
+    pushBreak(byMarket, canonicalizeValue(r.marketplace || 'Other', CANON_MARKETPLACES) || 'Other', units, r.royalty);
+    pushBreak(byBook, String(r.title == null ? '' : r.title).trim() || '(untitled)', units, r.royalty);
+  }
+  var monthKeys = Object.keys(monthsMap).sort();
+  var months = [];
+  for (var k = 0; k < monthKeys.length; k++) months.push(monthsMap[monthKeys[k]]);
+  var bestMonth = null;
+  for (var j = 0; j < months.length; j++) {
+    if (bestMonth === null || months[j].total > bestMonth.total) bestMonth = { ym: months[j].ym, total: months[j].total };
+  }
+  var trend = null;
+  if (months.length >= 2) {
+    var prev = months[months.length - 2];
+    var last = months[months.length - 1];
+    trend = { fromYm: prev.ym, toYm: last.ym, fromTotal: prev.total, toTotal: last.total, pct: pctChangeNum(prev.total, last.total) };
+  }
+  var yearKeys = Object.keys(yearsMap).sort();
+  var years = [];
+  var prevTotal = 0;
+  for (var w = 0; w < yearKeys.length; w++) {
+    var y2 = yearsMap[yearKeys[w]];
+    y2.pct = prevTotal > 0 ? pctChangeNum(prevTotal, y2.total) : null;
+    years.push(y2);
+    prevTotal = y2.total;
+  }
+  var grandRounded = roundMoney(grandTotal);
+  return {
+    count: count,
+    grandTotal: grandRounded,
+    grandUnits: grandUnits,
+    months: months,
+    bestMonth: bestMonth,
+    trend: trend,
+    byFormat: sortedBreakdown(byFormat, grandTotal),
+    byMarketplace: sortedBreakdown(byMarket, grandTotal),
+    byBook: sortedBreakdown(byBook, grandTotal),
+    years: years
+  };
+}
+/*@KDP-CORE-END@*/
+
+function P(id) { return document.getElementById(id); }
+function esc(s) {
+  var str = String(s == null ? '' : s);
+  var map = {
+    '&': '&' + 'amp;',
+    '<': '&' + 'lt;',
+    '>': '&' + 'gt;',
+    '"': '&' + 'quot;',
+    "'": '&' + '#39;'
+  };
+  return str.replace(/[&<>"']/g, function (ch) { return map[ch]; });
+}
+
+var STORE_KEY = 'kdp-sales-tracker-v1';
+var state = {
+  records: [],
+  notes: [],
+  extraBooks: [],
+  settings: { theme: 'auto', symbol: '$', yearFilter: 'all' },
+  editId: null
+};
+
+function loadState() {
+  var raw = null;
+  try { raw = localStorage.getItem(STORE_KEY); } catch (e) { raw = null; }
+  if (!raw) return;
+  try {
+    var data = JSON.parse(raw);
+    if (data && data.v === 1) {
+      state.records = Array.isArray(data.records) ? data.records : [];
+      state.notes = Array.isArray(data.notes) ? data.notes : [];
+      state.extraBooks = Array.isArray(data.extraBooks) ? data.extraBooks : [];
+      if (data.settings && typeof data.settings === 'object') {
+        state.settings = Object.assign(state.settings, data.settings);
+      }
+    }
+  } catch (e) {
+    showStatus('Saved data could not be read or looks corrupted, so the tracker started fresh. A CSV export would have been a safe backup.', 'err');
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({ v: 1, records: state.records, notes: state.notes, extraBooks: state.extraBooks, settings: state.settings }));
+    return true;
+  } catch (e) {
+    showStatus('Could not save to browser storage. If storage is full or blocked, export a CSV backup.', 'err');
+    return false;
+  }
+}
+
+function todayISO() {
+  var d = new Date();
+  var m = d.getMonth() + 1;
+  var day = d.getDate();
+  return d.getFullYear() + '-' + (m < 10 ? '0' + m : m) + '-' + (day < 10 ? '0' + day : day);
+}
+
+function currentSymbol() {
+  return state.settings.symbol || '';
+}
+
+function money(n) { return fmtMoney(n, currentSymbol()); }
+
+function showStatus(msg, kind) {
+  var box = P('status');
+  box.innerHTML = '<div class="msg ' + esc(kind || '') + '">' + esc(msg) + '</div>';
+  clearTimeout(showStatus._t);
+  showStatus._t = setTimeout(function () { box.innerHTML = ''; }, kind === 'err' ? 8000 : 4500);
+}
+
+function allBookNames() {
+  var set = {};
+  var names = state.extraBooks.slice();
+  for (var i = 0; i < state.records.length; i++) {
+    var t = String(state.records[i].title || '').trim();
+    if (t && !set[t.toLowerCase()]) { set[t.toLowerCase()] = true; names.push(t); }
+  }
+  for (var j = 0; j < state.notes.length; j++) {
+    var t2 = String(state.notes[j].book || '').trim();
+    if (t2 && !set[t2.toLowerCase()]) { set[t2.toLowerCase()] = true; names.push(t2); }
+  }
+  return names;
+}
+
+function applyTheme() {
+  var want = state.settings.theme || 'auto';
+  P('themeSelect').value = want === 'light' || want === 'dark' ? want : 'auto';
+  document.documentElement.setAttribute('data-theme', want);
+}
+
+function yearOptions() {
+  var ys = distinctYears(state.records);
+  var cy = String(new Date().getFullYear());
+  if (ys.indexOf(cy) === -1) ys.push(cy);
+  ys.sort();
+  return ys;
+}
+
+function monthCell(v) { return v === 0 ? '<span class="muted">—</span>' : esc(money(v)); }
+
+function renderSummary(scope, agg) {
+  var yearSel = P('yearFilter');
+  P('statTotalLabel').textContent = agg.count ? 'Royalties (' + (state.settings.yearFilter === 'all' ? 'all time' : esc(state.settings.yearFilter)) + ')' : 'Royalties';
+  P('statTotal').textContent = money(agg.grandTotal);
+  P('statTotalSub').textContent = agg.count ? fmtInt(agg.grandUnits) + ' units across ' + fmtInt(agg.count) + ' entries' : 'no data yet';
+  if (agg.bestMonth) {
+    P('statBest').textContent = MONTH_NAMES[+agg.bestMonth.ym.slice(5, 7) - 1] + ' ' + esc(agg.bestMonth.ym.slice(0, 4));
+    P('statBestSub').textContent = money(agg.bestMonth.total) + ' — top month' + (state.settings.yearFilter === 'all' ? '' : ' in ' + esc(state.settings.yearFilter));
+  } else {
+    P('statBest').textContent = '—';
+    P('statBestSub').textContent = 'add sales to find your best month';
+  }
+  if (agg.trend) {
+    var pct = agg.trend.pct;
+    var cls = pct == null ? 'flat' : (pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat');
+    var arrow = pct == null ? (agg.trend.toTotal > 0 ? '▲' : '—') : (pct > 0 ? '▲' : pct < 0 ? '▼' : '—');
+    var label = pct == null ? (agg.trend.toTotal > 0 ? 'new sales' : 'flat') : ((pct > 0 ? '+' : '') + pct.toFixed(1) + '%');
+    P('statTrend').innerHTML = '<span class="chip ' + cls + '">' + arrow + ' ' + esc(label) + '</span>';
+    P('statTrendSub').textContent = monthLabel(agg.trend.toYm) + ' vs ' + monthLabel(agg.trend.fromYm);
+  } else {
+    P('statTrend').textContent = '—';
+    P('statTrendSub').textContent = agg.count ? 'needs at least two months' : 'month to month';
+  }
+  P('statCount').textContent = fmtInt(agg.count);
+  P('statCountSub').textContent = agg.count ? (yearSel.value === 'all' ? 'across all years' : 'in ' + esc(yearSel.value)) : 'in this view';
+}
+
+function renderMonthly(scope, agg) {
+  var isYear = state.settings.yearFilter !== 'all' && /^\d{4}$/.test(String(state.settings.yearFilter));
+  var chart = P('monthChart');
+  var labels = P('monthChartLabels');
+  var tbody = P('mTbody');
+  P('monthCaption').textContent = isYear ? 'Monthly totals for ' + state.settings.yearFilter : 'Monthly totals, all time';
+  chart.innerHTML = '';
+  labels.innerHTML = '';
+  tbody.innerHTML = '';
+  var max = 0;
+  for (var i = 0; i < agg.months.length; i++) if (agg.months[i].total > max) max = agg.months[i].total;
+  if (!agg.months.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">No sales yet — add your first entry above or load the sample data.</td></tr>';
+    P('mTotalRoyalty').textContent = '—';
+    P('mTotalCount').textContent = '0';
+    P('mTotalUnits').textContent = '0';
+    P('mTotalShare').textContent = '100%';
+    return;
+  }
+  var totalUnits = 0;
+  var totalCount = 0;
+  var totalRoyalty = 0;
+  for (var m = 0; m < agg.months.length; m++) {
+    var M = agg.months[m];
+    totalUnits += M.units;
+    totalCount += M.count;
+    totalRoyalty += M.total;
+    var h = max > 0 ? Math.max(2, Math.round(M.total / max * 140)) : 2;
+    var shortLabel = isYear ? MONTH_NAMES[+M.ym.slice(5, 7) - 1] : M.ym;
+    chart.insertAdjacentHTML('beforeend',
+      '<div class="barcol" title="' + esc(money(M.total)) + '"><div class="v">' + esc(money(M.total)) + '</div>' +
+      '<div class="bar" style="height:' + h + 'px"></div></div>');
+    labels.insertAdjacentHTML('beforeend', '<span>' + esc(shortLabel) + '</span>');
+    var pct = agg.grandTotal > 0 ? round1(M.total / agg.grandTotal * 100) : 0;
+    tbody.insertAdjacentHTML('beforeend', '<tr><td>' + esc(monthLabel(M.ym)) + '</td>' +
+      '<td class="num">' + fmtInt(M.count) + '</td>' +
+      '<td class="num">' + (M.units ? fmtInt(M.units) : '<span class="muted">—</span>') + '</td>' +
+      '<td class="num">' + esc(money(M.total)) + '</td>' +
+      '<td class="num">' + (pct ? pct.toFixed(1) + '%' : '—') + '</td></tr>');
+  }
+  P('mTotalCount').textContent = fmtInt(totalCount);
+  P('mTotalUnits').textContent = fmtInt(totalUnits);
+  P('mTotalRoyalty').textContent = money(totalRoyalty);
+  P('mTotalShare').textContent = '100%';
+}
+
+function renderBreakTab(rows, tbodyId) {
+  var tbody = P(tbodyId);
+  tbody.innerHTML = '';
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">Nothing in this view yet.</td></tr>';
+    return;
+  }
+  for (var i = 0; i < rows.length; i++) {
+    var b = rows[i];
+    var w = b.pct > 0 ? Math.min(100, b.pct) : 0;
+    tbody.insertAdjacentHTML('beforeend', '<tr><td>' + esc(b.key) + '</td>' +
+      '<td class="num">' + (b.units ? fmtInt(b.units) : '<span class="muted">—</span>') + '</td>' +
+      '<td class="num">' + esc(money(b.total)) + '</td>' +
+      '<td><div class="hbar" title="' + b.pct.toFixed(1) + '%"><i style="width:' + w + '%"></i></div></td></tr>');
+  }
+}
+
+function renderBooks(scope, agg) {
+  var tbody = P('bookTbody');
+  var names = allBookNames().sort(function (a, b) { return a.localeCompare(b); });
+  var aggByBook = {};
+  for (var i = 0; i < agg.byBook.length; i++) aggByBook[agg.byBook[i].key.toLowerCase()] = agg.byBook[i];
+  var rowsHtml = '';
+  for (var j = 0; j < names.length; j++) {
+    var name = names[j];
+    var a = aggByBook[name.toLowerCase()];
+    var noteCount = 0;
+    for (var k = 0; k < state.notes.length; k++) {
+      if (String(state.notes[k].book).toLowerCase() === name.toLowerCase()) noteCount++;
+    }
+    rowsHtml += '<tr><td>' + esc(name) + '</td>' +
+      '<td class="num">' + (a ? fmtInt(a.count) : '<span class="muted">—</span>') + '</td>' +
+      '<td class="num">' + (a && a.units ? fmtInt(a.units) : '<span class="muted">—</span>') + '</td>' +
+      '<td class="num">' + (a ? esc(money(a.total)) : '<span class="muted">—</span>') + '</td>' +
+      '<td class="num">' + noteCount + '</td>' +
+      '<td><button type="button" class="mini" data-act="notes" data-title="' + esc(name) + '">Notes</button> ' +
+      '<button type="button" class="mini danger" data-act="del-book" data-title="' + esc(name) + '">Remove</button></td></tr>';
+  }
+  tbody.innerHTML = rowsHtml || '<tr><td colspan="6" class="empty">No books yet — sales you log will appear here, or add a book by hand below the table.</td></tr>';
+  var select = P('bookSelect');
+  var current = select.value;
+  var opts = '';
+  for (var q = 0; q < names.length; q++) opts += '<option value="' + esc(names[q]) + '"' + (names[q] === current ? ' selected' : '') + '>' + esc(names[q]) + '</option>';
+  select.innerHTML = opts;
+  var dl = P('bookList');
+  dl.innerHTML = names.map(function (n) { return '<option value="' + esc(n) + '"></option>'; }).join('');
+  renderNotes();
+}
+
+function renderNotes() {
+  var book = P('bookSelect').value;
+  var list = P('notesList');
+  var hint = P('notesHint');
+  P('noteDate').value = P('noteDate').value || todayISO();
+  if (!book) { list.innerHTML = ''; hint.textContent = 'Add a sale or a book first — then its notes can live here.'; return; }
+  var notes = [];
+  var lb = book.toLowerCase();
+  for (var i = 0; i < state.notes.length; i++) {
+    if (String(state.notes[i].book).toLowerCase() === lb) notes.push(state.notes[i]);
+  }
+  notes.sort(function (a, b) {
+    if (a.date === b.date) return String(b.id).localeCompare(String(a.id));
+    return b.date < a.date ? -1 : 1;
+  });
+  hint.textContent = book ? ('Notes for: ' + book) : 'Select a book to see its notes.';
+  if (!notes.length) {
+    list.innerHTML = '<li class="empty" style="list-style:none">No rank notes for this book yet. Note the little things — a promo, an ad — and the numbers will tell the story.</li>';
+    return;
+  }
+  var html = '';
+  for (var j = 0; j < notes.length; j++) {
+    var n = notes[j];
+    html += '<li style="list-style:none;border-bottom:1px solid var(--grid);padding:.35rem 0">' +
+      '<strong>' + esc(n.date) + '</strong>' +
+      (n.rank != null ? ' <span class="rankbadge">Rank: ' + esc(fmtInt(n.rank)) + '</span>' : '') +
+      (n.text ? '<br><span class="small">' + esc(n.text) + '</span>' : '') +
+      ' <button type="button" class="mini danger" data-act="del-note" data-id="' + esc(n.id) + '">Delete</button></li>';
+  }
+  list.innerHTML = html;
+}
+
+function renderYoy(agg) {
+  var head = P('yoyHeadRow');
+  var tbody = P('yoyTbody');
+  var cols = '<th scope="col">Year</th>';
+  for (var m = 0; m < 12; m++) cols += '<th scope="col" class="num">' + MONTH_NAMES[m] + '</th>';
+  cols += '<th scope="col" class="num">Total</th><th scope="col" class="num">YoY</th>';
+  head.innerHTML = cols;
+  tbody.innerHTML = '';
+  if (!agg.years.length) {
+    tbody.innerHTML = '<tr><td colspan="14" class="empty">No years to compare yet — import or add some sales first.</td></tr>';
+    return;
+  }
+  for (var i = 0; i < agg.years.length; i++) {
+    var Y = agg.years[i];
+    var cells = '';
+    for (var m2 = 0; m2 < 12; m2++) cells += '<td class="num">' + monthCell(Y.months[m2]) + '</td>';
+    var yoy = Y.pct == null ? '<span class="muted">—</span>' : ((Y.pct > 0 ? '+' : '') + Y.pct.toFixed(1) + '%');
+    tbody.insertAdjacentHTML('beforeend', '<tr><th scope="row">' + esc(Y.year) + '</th>' + cells +
+      '<td class="num">' + esc(money(Y.total)) + '</td><td class="num">' + yoy + '</td></tr>');
+  }
+}
+
+var ENTRY_DISPLAY_LIMIT = 200;
+
+function renderEntries() {
+  var tbody = P('entriesTbody');
+  var q = P('searchInput').value.trim().toLowerCase();
+  var sorted = state.records.slice().sort(function (a, b) {
+    if (a.date === b.date) return String(b.id).localeCompare(String(a.id));
+    return a.date < b.date ? 1 : -1;
+  });
+  var shown = 0;
+  var html = '';
+  for (var i = 0; i < sorted.length && shown < ENTRY_DISPLAY_LIMIT; i++) {
+    var r = sorted[i];
+    if (q) {
+      var hay = (r.title + ' ' + r.format + ' ' + r.marketplace).toLowerCase();
+      if (hay.indexOf(q) === -1) continue;
+    }
+    shown++;
+    html += '<tr><td>' + esc(r.date) + '</td><td>' + esc(r.title) + '</td><td>' + esc(r.format) + '</td>' +
+      '<td>' + esc(r.marketplace) + '</td>' +
+      '<td class="num">' + (r.units == null ? '<span class="muted">—</span>' : esc(fmtInt(r.units))) + '</td>' +
+      '<td class="num">' + esc(money(r.royalty)) + '</td>' +
+      '<td><button type="button" class="mini" data-act="edit" data-id="' + esc(r.id) + '">Edit</button> ' +
+      '<button type="button" class="mini danger" data-act="del-entry" data-id="' + esc(r.id) + '">Delete</button></td></tr>';
+  }
+  tbody.innerHTML = html || '<tr><td colspan="7" class="empty">' + (q ? 'No entries match that filter.' : 'No entries yet — your log will grow here.') + '</td></tr>';
+  var note = P('entriesNote');
+  var total = q ? shown : sorted.length;
+  if (sorted.length > ENTRY_DISPLAY_LIMIT && !q) {
+    note.hidden = false;
+    note.textContent = 'Showing the newest ' + ENTRY_DISPLAY_LIMIT + ' of ' + fmtInt(sorted.length) + ' entries. Use the filter above to find older ones, or export the CSV.';
+  } else {
+    note.hidden = true;
+  }
+}
+
+function updateYearFilterOptions() {
+  var sel = P('yearFilter');
+  var ys = yearOptions();
+  var want = String(state.settings.yearFilter == null ? 'all' : state.settings.yearFilter);
+  var valid = want === 'all' || ys.indexOf(want) !== -1;
+  if (!valid) {
+    var latest = latestYear(state.records);
+    state.settings.yearFilter = latest || 'all';
+    want = String(state.settings.yearFilter);
+  }
+  var opts = '<option value="all"' + (want === 'all' ? ' selected' : '') + '>All years</option>';
+  for (var i = ys.length - 1; i >= 0; i--) {
+    var y = ys[i];
+    opts += '<option value="' + y + '"' + (y === want ? ' selected' : '') + '>' + y + '</option>';
+  }
+  sel.innerHTML = opts;
+}
+
+function renderAll() {
+  updateYearFilterOptions();
+  var yearSel = state.settings.yearFilter;
+  var scope = filterRecordsByYear(state.records, yearSel === 'all' ? null : yearSel);
+  var agg = buildAggregates(scope);
+  var aggAll = buildAggregates(state.records);
+  renderSummary(scope, agg);
+  renderMonthly(scope, agg);
+  renderBreakTab(agg.byFormat, 'fmtTbody');
+  renderBreakTab(agg.byMarketplace, 'mktTbody');
+  renderBooks(scope, agg);
+  renderYoy(aggAll);
+  renderEntries();
+}
+
+function resetFormDefaults() {
+  P('eDate').value = todayISO();
+  P('eUnits').value = '';
+  P('eRoyalty').value = '';
+  P('saveBtn').textContent = 'Add sale';
+  P('cancelField').hidden = true;
+  P('editHint').textContent = '';
+}
+
+function startEdit(id) {
+  var rec = null;
+  for (var i = 0; i < state.records.length; i++) if (state.records[i].id === id) rec = state.records[i];
+  if (!rec) return showStatus('That entry could not be found — it may have been deleted already.', 'err');
+  state.editId = id;
+  P('eDate').value = rec.date;
+  P('eTitle').value = rec.title;
+  P('eFormat').value = rec.format;
+  P('eMarket').value = rec.marketplace;
+  P('eUnits').value = rec.units == null ? '' : String(rec.units);
+  P('eRoyalty').value = String(rec.royalty);
+  P('saveBtn').textContent = 'Save changes';
+  P('cancelField').hidden = false;
+  P('editHint').textContent = 'Editing the entry from ' + rec.date + ' — saving keeps it in place and updates the numbers.';
+  P('eTitle').focus();
+}
+
+function cancelEdit() {
+  state.editId = null;
+  resetFormDefaults();
+  showStatus('Edit cancelled.');
+}
+
+function submitEntry(ev) {
+  ev.preventDefault();
+  var date = normalizeDateString(P('eDate').value);
+  if (!date) return showStatus('Please pick a valid date.', 'err');
+  var title = String(P('eTitle').value).trim();
+  if (!title) return showStatus('A book title is needed — even a working title is fine.', 'err');
+  var royalty = parseRoyaltyValue(P('eRoyalty').value);
+  if (royalty == null) { showStatus('The royalty amount is required (numbers like 7.18).', 'err'); P('eRoyalty').focus(); return; }
+  var unitsRaw = String(P('eUnits').value).trim();
+  var units = unitsRaw === '' ? null : parseUnitsValue(unitsRaw);
+  if (unitsRaw !== '' && units == null) { showStatus('Units should be a plain whole number, e.g. 3.', 'err'); P('eUnits').focus(); return; }
+  var format = canonicalizeValue(P('eFormat').value || 'Other', CANON_FORMATS) || 'Other';
+  var market = canonicalizeValue(P('eMarket').value || 'Other', CANON_MARKETPLACES) || 'Other';
+  if (state.editId) {
+    for (var i = 0; i < state.records.length; i++) {
+      if (state.records[i].id === state.editId) {
+        state.records[i] = { id: state.editId, date: date, title: title, format: format, marketplace: market, units: units, royalty: roundMoney(royalty) };
+      }
+    }
+    state.editId = null;
+    resetFormDefaults();
+    saveState(); renderAll();
+    showStatus('Entry updated — the charts and totals refreshed.');
+  } else {
+    state.records.push({ id: makeId(), date: date, title: title, format: format, marketplace: market, units: units, royalty: roundMoney(royalty) });
+    saveState();
+    resetFormDefaults();
+    renderAll();
+    P('eDate').focus();
+    showStatus('Sale logged for ' + title + '.');
+  }
+}
+
+function deleteEntry(id) {
+  var r = null;
+  for (var i = 0; i < state.records.length; i++) if (state.records[i].id === id) r = state.records[i];
+  if (!r) return;
+  if (!confirm('Delete this entry?\n\n' + r.date + ' — ' + r.title + '\n' + money(r.royalty))) return;
+  if (state.editId === id) cancelEdit();
+  state.records = state.records.filter(function (x) { return x.id !== id; });
+  saveState(); renderAll();
+  showStatus('Entry deleted.');
+}
+
+function removeBook(title) {
+  var lower = title.toLowerCase();
+  var recs = 0;
+  for (var i = 0; i < state.records.length; i++) if (String(state.records[i].title).toLowerCase() === lower) recs++;
+  var notes = 0;
+  for (var j = 0; j < state.notes.length; j++) if (String(state.notes[j].book).toLowerCase() === lower) notes++;
+  var msg = recs || notes
+    ? 'Remove "' + title + '" and its ' + recs + ' sale entr' + (recs === 1 ? 'y' : 'ies') + ' plus ' + notes + ' rank note' + (notes === 1 ? '' : 's') + '? This cannot be undone.'
+    : 'Remove the book "' + title + '"? This cannot be undone.';
+  if (!confirm(msg)) return;
+  state.records = state.records.filter(function (r) { return String(r.title).toLowerCase() !== lower; });
+  state.notes = state.notes.filter(function (n) { return String(n.book).toLowerCase() !== lower; });
+  state.extraBooks = state.extraBooks.filter(function (t) { return String(t).toLowerCase() !== lower; });
+  if (state.editId) { state.editId = null; resetFormDefaults(); }
+  saveState(); renderAll();
+  showStatus('Book removed.');
+}
+
+function submitNote(ev) {
+  ev.preventDefault();
+  var book = P('bookSelect').value;
+  if (!book) return showStatus('Add a sale (or a book by hand) first, so the note has somewhere to live.', 'err');
+  var date = normalizeDateString(P('noteDate').value);
+  if (!date) { showStatus('The note needs a valid date.', 'err'); P('noteDate').focus(); return; }
+  var text = String(P('noteText').value).trim();
+  var rankRaw = String(P('noteRank').value).trim();
+  var rank = rankRaw === '' ? null : parseRoyaltyValue(rankRaw);
+  if (rankRaw !== '' && rank == null) { showStatus('The rank should be a plain number like 8412.', 'err'); P('noteRank').focus(); return; }
+  rank = rank == null ? null : Math.round(rank);
+  if (!text && rank == null) { showStatus('Write something in the note, or give a rank number — at least one, please.', 'err'); P('noteText').focus(); return; }
+  if (!text && rank != null) text = 'Rank check-in';
+  state.notes.push({ id: makeId(), book: book, date: date, text: text, rank: rank });
+  saveState(); renderAll();
+  P('noteText').value = '';
+  P('noteRank').value = '';
+  showStatus('Rank note saved for ' + book + '.');
+}
+
+function deleteNote(id) {
+  state.notes = state.notes.filter(function (n) { return n.id !== id; });
+  saveState(); renderNotes();
+  showStatus('Note deleted.');
+}
+
+function doExportCsv() {
+  if (!state.records.length) return showStatus('Nothing to export yet — add or import some sales first.', 'err');
+  var csv = recordsToCsv(state.records.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }));
+  downloadBlob(new Blob([csv], { type: 'text/csv' }), 'kdp-sales-' + todayISO() + '.csv');
+  showStatus('CSV exported — ' + fmtInt(state.records.length) + ' entries.');
+}
+
+function doBackupJson() {
+  var payload = JSON.stringify({ v: 1, records: state.records, notes: state.notes, extraBooks: state.extraBooks, settings: state.settings }, null, 2);
+  downloadBlob(new Blob([payload], { type: 'application/json' }), 'kdp-sales-tracker-backup-' + todayISO() + '.json');
+  showStatus('Full backup downloaded (includes rank notes).');
+}
+
+function downloadBlob(blob, filename) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+}
+
+function doImport() {
+  var text = P('importText').value;
+  if (!text.trim()) return showStatus('Pick a CSV file or paste some rows first.', 'err');
+  var modeEl = document.querySelector('input[name="importMode"]:checked');
+  var mode = modeEl ? modeEl.value : 'append';
+  if (mode === 'replace' && state.records.length && !confirm('Replace ALL current entries (sales ' + fmtInt(state.records.length) + ', notes ' + fmtInt(state.notes.length) + ') with this import? Export a CSV first if you might want them back.')) return;
+  var res = parseKdpCsv(text);
+  if (!res.headerFound) {
+    P('importSummary').innerHTML = '<div class="empty">The first row needs to be a header containing a date column and a royalty column. Accepted header names include: Date, Title, Book, Format, Type, Marketplace, Store, Units, Quantity, Royalty, Earnings, Amount.</div>';
+    return showStatus('Import cancelled — the CSV needs a header row with date and royalty columns.', 'err');
+  }
+  var added = res.records.length;
+  if (added) {
+    state.records = mode === 'replace' ? res.records : state.records.concat(res.records);
+  }
+  var skippedHtml = '';
+  if (res.skipped.length) {
+    var items = '';
+    for (var i = 0; i < Math.min(5, res.skipped.length); i++) items += '<li>line ' + res.skipped[i].line + ': ' + esc(res.skipped[i].reason) + '</li>';
+    skippedHtml = '<div class="empty">' + fmtInt(res.skipped.length) + ' row(s) skipped<ul>' + items + '</ul>' +
+      (res.skipped.length > 5 ? '<em>&hellip;and ' + fmtInt(res.skipped.length - 5) + ' more.</em>' : '') + '</div>';
+  }
+  P('importSummary').innerHTML = '<div>' + fmtInt(added) + ' entr' + (added === 1 ? 'y' : 'ies') + ' imported in ' + esc(mode) + ' mode.' +
+    (skippedHtml || '') + '</div>';
+  saveState();
+  resetFormDefaults();
+  renderAll();
+  showStatus('Imported ' + fmtInt(added) + ' entr' + (added === 1 ? 'y' : 'ies') + ' (' + mode + ' mode).' + (res.skipped.length ? ' ' + fmtInt(res.skipped.length) + ' rows were skipped — details in the dialog.' : ''), added ? undefined : 'err');
+}
+
+function doSample() {
+  if (state.records.length) {
+    if (!confirm('Load sample data? This REPLACES your current entries and rank notes (first export a CSV if you want to keep them).')) return;
+  }
+  var csv = [
+    'Date,Title,Format,Marketplace,Units,Royalty',
+    '2025-03-02,The Massive AI Manual,Paperback,Amazon.com,1,7.18',
+    '2025-03-19,The Massive AI Manual,Kindle (eBook),Amazon.com,1,2.41',
+    '2025-06-05,The Massive AI Manual,Paperback,Amazon.com,2,14.36',
+    '2025-06-08,eBay Reseller Logbook,Paperback,Amazon.com,1,4.85',
+    '2025-08-11,The Massive AI Manual,Kindle (eBook),Amazon.co.uk,3,7.23',
+    '2025-08-27,The Massive AI Manual,Hardcover,Amazon.de,1,9.02',
+    '2025-11-14,eBay Reseller Logbook,Paperback,Amazon.com.au,2,9.70',
+    '2025-12-20,The Massive AI Manual,Paperback,Amazon.com,1,7.18',
+    '2026-01-09,The Massive AI Manual,Paperback,Amazon.com,3,21.54',
+    '2026-01-22,The Massive AI Manual,Kindle (eBook),Amazon.com,4,9.64',
+    '2026-02-03,eBay Reseller Logbook,Paperback,Amazon.com,2,9.70',
+    '2026-02-17,The Massive AI Manual,Audiobook,Amazon.com,1,12.60',
+    '2026-03-05,The Massive AI Manual,Paperback,Amazon.com,2,14.36',
+    '2026-03-28,eBay Reseller Logbook,Kindle (eBook),Amazon.co.uk,5,12.05',
+    '2026-04-11,The Massive AI Manual,Paperback,Amazon.ca,1,6.90',
+    '2026-04-24,The Massive AI Manual,Kindle (eBook),Amazon.de,2,4.82',
+    '2026-05-02,The Massive AI Manual,Paperback,Amazon.com,4,28.72',
+    '2026-05-09,Agent Skills Starter,Kindle (eBook),Amazon.com,6,14.46',
+    '2026-05-30,eBay Reseller Logbook,Paperback,Amazon.com,1,4.85',
+    '2026-06-14,The Massive AI Manual,Hardcover,Amazon.com,2,18.04',
+    '2026-06-27,Agent Skills Starter,Kindle (eBook),Amazon.com.au,3,7.23',
+    '2026-06-30,The Massive AI Manual,Kindle (eBook),Amazon.in,10,9.50',
+    '2026-07-08,The Massive AI Manual,Paperback,Amazon.com,2,14.36',
+    '2026-07-21,Agent Skills Starter,Paperback,Amazon.com,3,14.55',
+    '2026-08-02,The Massive AI Manual,Audiobook,Amazon.com,2,25.20',
+    '2026-08-16,eBay Reseller Logbook,Kindle (eBook),Amazon.com,7,16.87',
+    '2026-09-01,The Massive AI Manual,Paperback,Amazon.com,1,7.18',
+    '2026-09-03,The Massive AI Manual,Kindle (eBook),Amazon.com,2,4.82',
+    '2026-09-09,The Massive AI Manual,Audiobook,Amazon.com,-1,-4.85'
+  ].join('\n');
+  var res = parseKdpCsv(csv + '\n');
+  state.records = res.records;
+  state.notes = [
+    { id: makeId(), book: 'The Massive AI Manual', date: '2026-01-10', text: 'Launched 5-day Countdown Deal; Amazon ad budget at $3/day; page 8 for "AI books for beginners".', rank: 41288 },
+    { id: makeId(), book: 'The Massive AI Manual', date: '2026-05-03', text: 'Second price promo ran all week, sales doubled vs April.', rank: 18472 },
+    { id: makeId(), book: 'Agent Skills Starter', date: '2026-07-22', text: 'Ranked in two new-release niches after the launch newsletter.', rank: 62713 }
+  ];
+  state.extraBooks = [];
+  if (state.editId) { state.editId = null; resetFormDefaults(); }
+  state.settings.yearFilter = '2026';
+  saveState();
+  resetFormDefaults();
+  renderAll();
+  showStatus('Sample data loaded (one line is a refund showing as a negative royalty). Clear it any time with Clear all data.');
+}
+
+function doClearAll() {
+  if (!confirm('Delete EVERYTHING (all entries and rank notes)? This cannot be undone. Export a CSV first if you might want it back.')) return;
+  state.records = [];
+  state.notes = [];
+  state.extraBooks = [];
+  if (state.editId) { state.editId = null; resetFormDefaults(); }
+  saveState(); renderAll();
+  showStatus('All data cleared. A fresh, empty tracker.');
+}
+
+function doTemplate() {
+  downloadBlob(new Blob([templateCsv()], { type: 'text/csv' }), 'kdp-sales-template.csv');
+  showStatus('Template downloaded — open it, replace the example rows, and import away.');
+}
+
+function doRestore(ev) {
+  var file = ev.target.files && ev.target.files[0];
+  ev.target.value = '';
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function () {
+    try {
+      var data = JSON.parse(String(reader.result));
+      if (!data || data.v !== 1 || !Array.isArray(data.records)) throw new Error('format');
+      if (!confirm('Restore backup? This REPLACES current entries (' + fmtInt(state.records.length) + ') and notes (' + fmtInt(state.notes.length) + ').')) return;
+      state.records = data.records;
+      state.notes = Array.isArray(data.notes) ? data.notes : [];
+      state.extraBooks = Array.isArray(data.extraBooks) ? data.extraBooks : [];
+      if (data.settings && typeof data.settings === 'object') state.settings = Object.assign(state.settings, data.settings);
+      if (state.editId) { state.editId = null; resetFormDefaults(); }
+      saveState(); renderAll();
+      showStatus('Backup restored — ' + fmtInt(state.records.length) + ' entries and ' + fmtInt(state.notes.length) + ' notes.');
+    } catch (e) {
+      showStatus('That file is not a tracker backup JSON.', 'err');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function init() {
+  loadState();
+  P('symbolSelect').value = state.settings.symbol;
+  applyTheme();
+  resetFormDefaults();
+  P('noteDate').value = todayISO();
+  P('formatList').innerHTML = CANON_FORMATS.map(function (f) { return '<option value="' + esc(f) + '"></option>'; }).join('');
+  P('marketList').innerHTML = CANON_MARKETPLACES.map(function (m) { return '<option value="' + esc(m) + '"></option>'; }).join('');
+  renderAll();
+
+  P('entryForm').addEventListener('submit', submitEntry);
+  P('cancelEditBtn').addEventListener('click', cancelEdit);
+  P('noteForm').addEventListener('submit', submitNote);
+  P('bookForm').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var name = String(P('newBookTitle').value).trim();
+    if (!name) return;
+    var exists = false;
+    var lower = name.toLowerCase();
+    for (var i = 0; i < state.extraBooks.length; i++) if (String(state.extraBooks[i]).toLowerCase() === lower) exists = true;
+    if (!exists) state.extraBooks.push(name);
+    P('newBookTitle').value = '';
+    saveState(); renderAll();
+    P('bookSelect').value = name;
+    showStatus('Book "' + name + '" added — rank notes welcome.');
+  });
+  P('yearFilter').addEventListener('change', function (ev) {
+    state.settings.yearFilter = ev.target.value;
+    saveState(); renderAll();
+  });
+  P('symbolSelect').addEventListener('change', function (ev) {
+    state.settings.symbol = ev.target.value;
+    saveState(); renderAll();
+  });
+  P('themeSelect').addEventListener('change', function (ev) {
+    state.settings.theme = ev.target.value;
+    saveState(); applyTheme();
+  });
+  P('bookSelect').addEventListener('change', renderNotes);
+  P('searchInput').addEventListener('input', renderEntries);
+  P('importBtn').addEventListener('click', function () {
+    P('importSummary').innerHTML = '';
+    P('importDialog').showModal();
+  });
+  P('doImport').addEventListener('click', function (ev) {
+    ev.preventDefault();
+    doImport();
+  });
+  P('importFile').addEventListener('change', function (ev) {
+    var file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      P('importText').value = String(reader.result);
+      showStatus('File loaded into the paste box — press Import when ready.');
+    };
+    reader.readAsText(file);
+  });
+  P('exportBtn').addEventListener('click', doExportCsv);
+  P('templateBtn').addEventListener('click', doTemplate);
+  P('backupBtn').addEventListener('click', doBackupJson);
+  P('restoreBtn').addEventListener('click', function () { P('restoreInput').click(); });
+  P('restoreInput').addEventListener('change', doRestore);
+  P('sampleBtn').addEventListener('click', doSample);
+  P('clearBtn').addEventListener('click', doClearAll);
+  document.body.addEventListener('click', function (ev) {
+    var btn = ev.target.closest ? ev.target.closest('button[data-act]') : null;
+    if (!btn) return;
+    var act = btn.dataset.act;
+    if (act === 'edit') startEdit(btn.dataset.id);
+    else if (act === 'del-entry') deleteEntry(btn.dataset.id);
+    else if (act === 'del-note') deleteNote(btn.dataset.id);
+    else if (act === 'notes') {
+      var title = btn.dataset.title || '';
+      var select = P('bookSelect');
+      var opts = select.options;
+      for (var i = 0; i < opts.length; i++) if (opts[i].value === title) select.selectedIndex = i;
+      renderNotes();
+      P('bookSelect').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (act === 'del-book') removeBook(btn.dataset.title);
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
